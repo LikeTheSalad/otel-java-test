@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "application"
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'org.example'
@@ -12,6 +13,12 @@ repositories {
 
 application {
     mainClassName = "org.example.Main"
+}
+
+shadowJar {
+    archiveBaseName.set('otel-test')
+    archiveClassifier.set('')
+    archiveVersion.set('')
 }
 
 dependencies {
