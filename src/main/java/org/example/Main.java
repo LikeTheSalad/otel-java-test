@@ -27,11 +27,12 @@ public class Main {
     }
 
     private static void createSpan(OpenTelemetry openTelemetry, Protocol protocol) {
-        Span span = openTelemetry.getTracer("SomeTracer").spanBuilder("Some Span over " + protocol.name)
+        String spanName = "Some Span over " + protocol.name;
+        Span span = openTelemetry.getTracer("SomeTracer").spanBuilder(spanName)
                 .setAttribute("mytime", DATE_FORMAT.format(new Date()))
                 .startSpan();
         span.end();
-        System.out.println("Span sent over "+protocol.name);
+        System.out.println("Span sent with name: " + spanName);
     }
 
     private static OpenTelemetry setUpOpenTelemetry(Protocol protocol) {
