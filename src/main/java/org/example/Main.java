@@ -12,19 +12,32 @@ import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class Main {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd - HH:mm:ss");
 
     public static void main(String[] args) throws InterruptedException {
-        Protocol protocol = Protocol.GRPC;
+        Protocol protocol = findProtocol(args);
         String serviceName = "dummy service";
+
+        System.out.println(String.format("Setting up service: \"%s\" to export via \"%s\"", serviceName, protocol.name));
+
         OpenTelemetry openTelemetry = setUpOpenTelemetry(serviceName, protocol);
 
         while (true) {
             createSpan(openTelemetry, protocol);
             Thread.sleep(5000);
         }
+    }
+
+    private static Protocol findProtocol(String[] args) {
+        if(args == null || args.length == 0) {
+            System.out.println("No protocol passed, defaulting to GRPC.");
+            return Protocol.GRPC;
+        }
+        String arg = args[0].toUpperCase(Locale.US);
+        return Protocol.valueOf(arg);
     }
 
     private static void createSpan(OpenTelemetry openTelemetry, Protocol protocol) {
@@ -37,7 +50,6 @@ public class Main {
     }
 
     private static OpenTelemetry setUpOpenTelemetry(String serviceName, Protocol protocol) {
-        System.out.println("Setting up service: \"" + serviceName + "\"");
         return OpenTelemetrySdk.builder()
                 .setTracerProvider(
                         SdkTracerProvider.builder()
