@@ -31,7 +31,7 @@ public class Main {
                 .setAttribute("mytime", DATE_FORMAT.format(new Date()))
                 .startSpan();
         span.end();
-        System.out.println("Span created");
+        System.out.println("Span sent over "+protocol.name);
     }
 
     private static OpenTelemetry setUpOpenTelemetry(Protocol protocol) {
