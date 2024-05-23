@@ -29,6 +29,7 @@ public class Main {
                 .setAttribute("mytime", DATE_FORMAT.format(new Date()))
                 .startSpan();
         span.end();
+        System.out.println("Span created");
     }
 
     private static OpenTelemetry setUpOpenTelemetry() {
