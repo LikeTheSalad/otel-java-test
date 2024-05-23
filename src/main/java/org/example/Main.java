@@ -32,7 +32,7 @@ public class Main {
                 .setAttribute("mytime", DATE_FORMAT.format(new Date()))
                 .startSpan();
         span.end();
-        System.out.println("Span sent with name: " + spanName);
+        System.out.println("Span sent named: \"" + spanName + "\"");
     }
 
     private static OpenTelemetry setUpOpenTelemetry(Protocol protocol) {
