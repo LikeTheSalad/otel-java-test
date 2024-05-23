@@ -18,7 +18,8 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         Protocol protocol = Protocol.GRPC;
-        OpenTelemetry openTelemetry = setUpOpenTelemetry(protocol);
+        String serviceName = "dummy service";
+        OpenTelemetry openTelemetry = setUpOpenTelemetry(serviceName, protocol);
 
         while (true) {
             createSpan(openTelemetry, protocol);
@@ -35,12 +36,13 @@ public class Main {
         System.out.println("Span sent named: \"" + spanName + "\"");
     }
 
-    private static OpenTelemetry setUpOpenTelemetry(Protocol protocol) {
+    private static OpenTelemetry setUpOpenTelemetry(String serviceName, Protocol protocol) {
+        System.out.println("Setting up service: \"" + serviceName + "\"");
         return OpenTelemetrySdk.builder()
                 .setTracerProvider(
                         SdkTracerProvider.builder()
                                 .addSpanProcessor(SimpleSpanProcessor.create(getSpanExporter(protocol)))
-                                .addResource(Resource.create(Attributes.builder().put("service.name", "dummy service").build()))
+                                .addResource(Resource.create(Attributes.builder().put("service.name", serviceName).build()))
                                 .build())
                 .build();
     }
