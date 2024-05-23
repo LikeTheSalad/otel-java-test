@@ -1,34 +1,48 @@
 package org.example;
 
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.logs.Logger;
-import io.opentelemetry.exporter.logging.otlp.OtlpJsonLoggingLogRecordExporter;
-import io.opentelemetry.exporter.logging.otlp.OtlpJsonLoggingSpanExporter;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.logs.SdkLoggerProvider;
-import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Main {
-    public static void main(String[] args) {
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd - HH:mm:ss");
+
+    public static void main(String[] args) throws InterruptedException {
         OpenTelemetry openTelemetry = setUpOpenTelemetry();
 
-        Logger logger = openTelemetry.getLogsBridge().loggerBuilder("LoggerScope").build();
+        while (true) {
+            createSpan(openTelemetry);
+            Thread.sleep(5000);
+        }
+    }
 
-        logger.logRecordBuilder().setBody("Some body").emit();
+    private static void createSpan(OpenTelemetry openTelemetry) {
+        Span span = openTelemetry.getTracer("SomeTracer").spanBuilder("Some Span")
+                .setAttribute("mytime", DATE_FORMAT.format(new Date()))
+                .startSpan();
+        span.end();
     }
 
     private static OpenTelemetry setUpOpenTelemetry() {
         return OpenTelemetrySdk.builder()
-                .setLoggerProvider(
-                        SdkLoggerProvider.builder()
-                                .addLogRecordProcessor(SimpleLogRecordProcessor.create(OtlpJsonLoggingLogRecordExporter.create()))
-                                .build()
-                ).setTracerProvider(
+                .setTracerProvider(
                         SdkTracerProvider.builder()
-                                .addSpanProcessor(SimpleSpanProcessor.create(OtlpJsonLoggingSpanExporter.create()))
+                                .addSpanProcessor(SimpleSpanProcessor.create(getSpanExporter()))
+                                .addResource(Resource.create(Attributes.builder().put("service.name", "dummy service").build()))
                                 .build())
                 .build();
+    }
+
+    private static SpanExporter getSpanExporter() {
+        return OtlpGrpcSpanExporter.builder()
+                .setEndpoint("http://127.0.0.1:8200").build();
     }
 }
